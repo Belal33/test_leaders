@@ -1,143 +1,446 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Landing Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-        }
-        .container {
-            background-color: #fff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 90%;
-        }
-        h1 {
-            color: #0056b3;
-            margin-bottom: 20px;
-        }
-        p {
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-        .button {
-            display: inline-block;
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-        }
-        .button:hover {
-            background-color: #0056b3;
-        }
-        .fixed-button-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000; /* Ensure it's above other content */
-        }
-        .popup-overlay {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
-            justify-content: center;
-            align-items: center;
-        }
-        .popup-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; /* Could be more or less, depending on screen size */
-            max-width: 800px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            border-radius: 8px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            height: 80%;
-        }
-        .close-button {
-            color: #aaa;
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close-button:hover,
-        .close-button:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            flex-grow: 1;
-        }
-    </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>LeadersScout Chat</title>
 </head>
+<style>
+	body {
+		margin: 0;
+		padding: 0;
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	}
+
+	.iframe-container {
+		display: none;
+		position: fixed;
+		bottom: 100px;
+		right: 24px;
+		width: 420px;
+		height: 520px;
+		background: #ffffff;
+		border-radius: 20px;
+		box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 8px 25px rgba(65, 105, 225, 0.1);
+		z-index: 99999;
+		overflow: hidden;
+		backdrop-filter: blur(20px);
+		border: 1px solid rgba(255,255,255,0.2);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		transform: translateY(20px);
+		opacity: 0;
+	}
+
+	.iframe-container.show {
+		display: block;
+		transform: translateY(0);
+		opacity: 1;
+	}
+
+	.iframe-container iframe {
+		width: 100%;
+		height: 100%;
+		border: none;
+		border-radius: 20px;
+	}
+
+	/* Mobile responsiveness */
+	@media (max-width: 768px) {
+		.iframe-container {
+			width: 95%;
+			right: 2.5%;
+			left: auto;
+			bottom: 90px;
+			height: 70vh;
+			border-radius: 20px;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.iframe-container {
+			width: 100%;
+			right: 0;
+			left: 0;
+			bottom: 80px;
+			height: 75vh;
+			border-radius: 20px 20px 0 0;
+		}
+	}
+
+	/* Button animations */
+	@keyframes pulse {
+		0% { box-shadow: 0 8px 25px rgba(65, 105, 225, 0.4); }
+		50% { box-shadow: 0 8px 30px rgba(65, 105, 225, 0.6); }
+		100% { box-shadow: 0 8px 25px rgba(65, 105, 225, 0.4); }
+	}
+
+	#chat-toggle button {
+		animation: pulse 3s infinite;
+	}
+
+	#chat-toggle button:hover {
+		transform: translateY(-2px) scale(1.05);
+		box-shadow: 0 12px 35px rgba(65, 105, 225, 0.6) !important;
+		background: linear-gradient(135deg, #5a7bff 0%, #4169e1 100%) !important;
+	}
+
+	#chat-toggle button:active {
+		transform: translateY(0) scale(1.02);
+		box-shadow: 0 6px 20px rgba(65, 105, 225, 0.5) !important;
+	}
+
+	/* Close button */
+	.close-button {
+		position: absolute;
+		top: 15px;
+		right: 15px;
+		background: rgba(0,0,0,0.1);
+		border: none;
+		border-radius: 50%;
+		width: 30px;
+		height: 30px;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 100000;
+		transition: all 0.3s ease;
+		color: #666;
+	}
+
+	.close-button:hover {
+		background: rgba(0,0,0,0.2);
+		color: #333;
+	}
+
+	.close-button svg {
+		width: 16px;
+		height: 16px;
+	}
+
+	/* Fullscreen container styles */
+	.fullscreen-container {
+		display: none;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background: rgba(0,0,0,0.8);
+		z-index: 999999;
+		backdrop-filter: blur(15px);
+		overflow: hidden;
+		padding: 0;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		opacity: 0;
+	}
+
+	.fullscreen-container.show {
+		display: block;
+		opacity: 1;
+	}
+
+	.fullscreen-container iframe {
+		width: 90%;
+		height: 85%;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		border: none;
+		border-radius: 24px;
+		background: #ffffff;
+		box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.fullscreen-container .close-button {
+		position: absolute;
+		top: 20px;
+		right: 20px;
+		background: rgba(255,255,255,0.9);
+		border: none;
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000000;
+		transition: all 0.3s ease;
+		color: #333;
+		box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+	}
+
+	.fullscreen-container .close-button:hover {
+		background: rgba(255,255,255,1);
+		transform: scale(1.1);
+		box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+	}
+
+	.fullscreen-container .close-button svg {
+		width: 20px;
+		height: 20px;
+	}
+
+	/* Fullscreen button animations */
+	#fullscreen-btn {
+		animation: pulse 3s infinite;
+	}
+
+	#fullscreen-btn:hover {
+		transform: translateY(-2px) scale(1.05);
+		box-shadow: 0 12px 35px rgba(108, 92, 231, 0.6) !important;
+		background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%) !important;
+	}
+
+	#fullscreen-btn:active {
+		transform: translateY(0) scale(1.02);
+		box-shadow: 0 6px 20px rgba(108, 92, 231, 0.5) !important;
+	}
+
+	/* Mobile responsiveness for fullscreen */
+	@media (max-width: 768px) {
+		.fullscreen-container iframe {
+			width: 95%;
+			height: 90%;
+			border-radius: 20px;
+		}
+
+		.fullscreen-container .close-button {
+			top: 15px;
+			right: 15px;
+			width: 35px;
+			height: 35px;
+		}
+
+		.fullscreen-container .close-button svg {
+			width: 18px;
+			height: 18px;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.fullscreen-container iframe {
+			width: 100%;
+			height: 95%;
+			border-radius: 0;
+		}
+
+		#chat-buttons {
+			flex-direction: column-reverse;
+			gap: 8px;
+		}
+
+		#fullscreen-btn {
+			width: 48px;
+			height: 48px;
+		}
+
+		#fullscreen-btn svg {
+			width: 18px;
+			height: 18px;
+		}
+	}
+</style>
 <body>
-    <div class="container">
-        <h1>Welcome to Our Simple Landing Page</h1>
-        <p>This is a basic landing page created as per your request. It includes a responsive design and minimal styling to provide a clean and engaging user experience.</p>
-        <p>Feel free to customize the content and styles to fit your specific needs. This page is designed to be a starting point for your web project.</p>
-        <a href="#" class="button">Learn More</a>
-    </div>
+	<!-- Demo content to show the toggle functionality -->
+	<div style="padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.6; color: #333;">
+		<h1 style="color: #4169e1; margin-bottom: 20px;">LeadersScout Chat Demo</h1>
+		<p>This page demonstrates the dual chat functionality with both regular and fullscreen modes. Use the buttons in the bottom right corner to open the chat in different sizes.</p>
+		
+		<h2 style="color: #4169e1; margin-top: 30px;">Features:</h2>
+		<ul>
+			<li>✅ <strong>Regular Chat:</strong> Small popup (420×520px) positioned above the button</li>
+			<li>✅ <strong>Fullscreen Chat:</strong> Large centered popup (90% × 85% of screen)</li>
+			<li>✅ Smooth animations and transitions for both modes</li>
+			<li>✅ Close buttons inside each popup</li>
+			<li>✅ Click outside to close functionality</li>
+			<li>✅ Auto-close regular chat when opening fullscreen</li>
+			<li>✅ Fully responsive design for mobile devices</li>
+			<li>✅ Maintains all original chat functionality</li>
+		</ul>
 
-    <div class="fixed-button-container">
-        <button id="openPopup" class="button">Open Iframe Popup</button>
-    </div>
+		<h2 style="color: #4169e1; margin-top: 30px;">How to use:</h2>
+		<div style="display: flex; gap: 20px; margin: 20px 0;">
+			<div style="flex: 1; background: #f8f9ff; padding: 20px; border-radius: 12px; border-left: 4px solid #4169e1;">
+				<h3 style="margin-top: 0; color: #4169e1;">Regular Chat</h3>
+				<p><strong>Blue "HIRE ME" button:</strong> Opens a compact chat popup perfect for quick conversations while browsing.</p>
+			</div>
+			<div style="flex: 1; background: #f3f2ff; padding: 20px; border-radius: 12px; border-left: 4px solid #6c5ce7;">
+				<h3 style="margin-top: 0; color: #6c5ce7;">Fullscreen Chat</h3>
+				<p><strong>Purple expand button:</strong> Opens a large, immersive chat experience with more screen real estate.</p>
+			</div>
+		</div>
 
-    <div id="iframePopup" class="popup-overlay">
-        <div class="popup-content">
-            <span class="close-button">&times;</span>
-            <iframe id="myIframe" src="https://leadersscout.185-193-67-185.nip.io/static/chat.html" frameborder="0"></iframe>
-        </div>
-    </div>
+		<div style="background: #e8f5e8; padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #00b894;">
+			<strong>🚀 Try both modes:</strong> Click either button to experience the different chat sizes!
+		</div>
+	</div>
 
-    <script>
-        const openPopupBtn = document.getElementById('openPopup');
-        const iframePopup = document.getElementById('iframePopup');
-        const closeButton = document.querySelector('.close-button');
+	<!-- Regular chat popup -->
+	<div class="iframe-container" id="chat-popup">
+		<iframe id="myFrame" src="https://leadersscout.185-193-67-185.nip.io/static/chat.html" frameborder="0"></iframe>
+	</div>
 
-        openPopupBtn.addEventListener('click', () => {
-            iframePopup.style.display = 'flex';
-        });
+	<!-- Fullscreen chat popup -->
+	<div class="fullscreen-container" id="fullscreen-popup">
+		<button class="close-button" onclick="toggleFullscreenChat()" title="Close fullscreen chat">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="18" y1="6" x2="6" y2="18"></line>
+				<line x1="6" y1="6" x2="18" y2="18"></line>
+			</svg>
+		</button>
+		<iframe id="fullscreenFrame" src="https://leadersscout.185-193-67-185.nip.io/static/chat.html" frameborder="0"></iframe>
+	</div>
 
-        closeButton.addEventListener('click', () => {
-            iframePopup.style.display = 'none';
-        });
+	<!-- Chat buttons container -->
+	<div id="chat-buttons" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; gap: 12px; align-items: center;">
+		<!-- Fullscreen button -->
+		<button id="fullscreen-btn" onclick="toggleFullscreenChat()" style="display: none; background: linear-gradient(135deg, #4169e1 0%, #5a7bff 100%); color: #fff; border: none; border-radius: 50%; width: 56px; height: 56px; cursor: pointer; box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; backdrop-filter: blur(10px); position: relative; overflow: hidden; align-items: center; justify-content: center;" title="Open fullscreen chat">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+			</svg>
+			<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%); opacity: 0; transition: opacity 0.3s ease;"></div>
+		</button>
 
-        iframePopup.addEventListener('click', (event) => {
-            if (event.target === iframePopup) {
-                iframePopup.style.display = 'none';
-            }
-        });
-    </script>
+		<!-- Regular chat button -->
+		<button onclick="toggleChat()" style="background: linear-gradient(135deg, #4169e1 0%, #5a7bff 100%); color: #fff; border: none; border-radius: 50px; padding: 16px 24px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 12px 40px rgba(65, 105, 225, 0.4); white-space: nowrap; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.8px; text-transform: uppercase; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; backdrop-filter: blur(10px); position: relative; overflow: hidden;">
+			<span style="position: relative; z-index: 2;">hire me</span>
+			<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%); opacity: 0; transition: opacity 0.3s ease;"></div>
+		</button>
+	</div>
+
+	<script>
+		function toggleChat() {
+			const chatPopup = document.getElementById('chat-popup');
+			const isVisible = chatPopup.classList.contains('show');
+			const fullscreenBtn = document.getElementById('fullscreen-btn');
+			
+			if (isVisible) {
+				// Hide the chat popup
+				chatPopup.classList.remove('show');
+				setTimeout(() => {
+					chatPopup.style.display = 'none';
+					fullscreenBtn.style.display = 'none';
+				}, 300); // Wait for animation to complete
+			} else {
+
+				// Show the chat popup
+				chatPopup.style.display = 'block';
+				// Force reflow to ensure display change is applied
+				chatPopup.offsetHeight;
+				chatPopup.classList.add('show');
+				fullscreenBtn.style.display = 'flex';
+			}
+		}	
+
+		// Fullscreen chat toggle function
+		function toggleFullscreenChat() {
+			const fullscreenPopup = document.getElementById('fullscreen-popup');
+			const isVisible = fullscreenPopup.classList.contains('show');
+			const fullscreenBtn = document.getElementById('fullscreen-btn');
+			
+			if (isVisible) {
+				// Hide the fullscreen popup
+				fullscreenPopup.classList.remove('show');
+				setTimeout(() => {
+					fullscreenPopup.style.display = 'none';
+				}, 300); // Wait for animation to complete
+			} else {
+
+				// Close regular chat if it's open
+				const chatPopup = document.getElementById('chat-popup');
+				if (chatPopup.classList.contains('show')) {
+					toggleChat();
+				}
+				
+				// Show the fullscreen popup
+				fullscreenPopup.style.display = 'block';
+				// Force reflow to ensure display change is applied
+				fullscreenPopup.offsetHeight;
+				fullscreenPopup.classList.add('show');
+				fullscreenBtn.style.display = 'flex';
+			}
+		}
+
+		// Close chat when clicking outside the popup
+		document.addEventListener('click', function(event) {
+			const chatPopup = document.getElementById('chat-popup');
+			const fullscreenPopup = document.getElementById('fullscreen-popup');
+			const chatButtons = document.getElementById('chat-buttons');
+			
+			// Close regular chat popup
+			if (chatPopup.classList.contains('show') && 
+				!chatPopup.contains(event.target) && 
+				!chatButtons.contains(event.target)) {
+				toggleChat();
+			}
+			
+			// Close fullscreen popup when clicking on the backdrop
+			if (fullscreenPopup.classList.contains('show') && 
+				event.target === fullscreenPopup) {
+				toggleFullscreenChat();
+			}
+		});
+
+		// Handle iframe communication (optional - for future enhancements)
+		window.addEventListener('message', function(event) {
+			// Handle messages from the iframe if needed
+			if (event.data.type === 'closeChat') {
+				toggleChat();
+			}
+		});
+
+		// Responsive adjustments
+		function adjustForMobile() {
+			const chatPopup = document.getElementById('chat-popup');
+			const fullscreenPopup = document.getElementById('fullscreen-popup');
+			const chatButtons = document.getElementById('chat-buttons');
+			
+			if (window.innerWidth <= 480) {
+				// Very small screens - make regular chat nearly fullscreen
+				chatPopup.style.width = '100%';
+				chatPopup.style.right = '0';
+				chatPopup.style.left = '0';
+				chatPopup.style.bottom = '80px';
+				chatPopup.style.height = '75vh';
+				chatPopup.style.borderRadius = '20px 20px 0 0';
+				
+				// Stack buttons vertically on very small screens
+				chatButtons.style.flexDirection = 'column-reverse';
+				chatButtons.style.gap = '8px';
+			} else if (window.innerWidth <= 768) {
+				// Mobile screens
+				chatPopup.style.width = '95%';
+				chatPopup.style.right = '2.5%';
+				chatPopup.style.left = 'auto';
+				chatPopup.style.bottom = '90px';
+				chatPopup.style.height = '70vh';
+				chatPopup.style.borderRadius = '20px';
+				
+				// Reset button layout for tablets
+				chatButtons.style.flexDirection = 'row';
+				chatButtons.style.gap = '12px';
+			} else {
+				// Desktop - reset to default
+				chatPopup.style.width = '420px';
+				chatPopup.style.right = '24px';
+				chatPopup.style.left = 'auto';
+				chatPopup.style.bottom = '100px';
+				chatPopup.style.height = '520px';
+				chatPopup.style.borderRadius = '20px';
+				
+				// Reset button layout for desktop
+				chatButtons.style.flexDirection = 'row';
+				chatButtons.style.gap = '12px';
+			}
+		}
+
+		// Call on page load and window resize
+		window.addEventListener('load', adjustForMobile);
+		window.addEventListener('resize', adjustForMobile);
+	</script>
+
 </body>
-</html>
