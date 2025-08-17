@@ -45,6 +45,60 @@
         .button:hover {
             background-color: #0056b3;
         }
+        .fixed-button-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000; /* Ensure it's above other content */
+        }
+        .popup-overlay {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .popup-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 800px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 80%;
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            flex-grow: 1;
+        }
     </style>
 </head>
 <body>
@@ -54,6 +108,36 @@
         <p>Feel free to customize the content and styles to fit your specific needs. This page is designed to be a starting point for your web project.</p>
         <a href="#" class="button">Learn More</a>
     </div>
-	<script src="https://leadersscout.185-193-67-185.nip.io/static/chat-widget.js"></script>
+
+    <div class="fixed-button-container">
+        <button id="openPopup" class="button">Open Iframe Popup</button>
+    </div>
+
+    <div id="iframePopup" class="popup-overlay">
+        <div class="popup-content">
+            <span class="close-button">&times;</span>
+            <iframe id="myIframe" src="https://leadersscout.185-193-67-185.nip.io/static/chat.html" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const openPopupBtn = document.getElementById('openPopup');
+        const iframePopup = document.getElementById('iframePopup');
+        const closeButton = document.querySelector('.close-button');
+
+        openPopupBtn.addEventListener('click', () => {
+            iframePopup.style.display = 'flex';
+        });
+
+        closeButton.addEventListener('click', () => {
+            iframePopup.style.display = 'none';
+        });
+
+        iframePopup.addEventListener('click', (event) => {
+            if (event.target === iframePopup) {
+                iframePopup.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
